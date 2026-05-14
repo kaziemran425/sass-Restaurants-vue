@@ -19,11 +19,35 @@ const routes = [
     ],
   },
 
-  // --- Main Admin / Dashboard Layout ---
+  // --- Super Admin Layout (SaaS Master Control) ---
+  {
+    path: "/superadmin",
+    component: () => import("src/layouts/SuperAdminLayout.vue"),
+    meta: { requiresAuth: true, role: "superadmin" },
+    children: [
+      {
+        path: "dashboard",
+        name: "saas-dashboard",
+        component: () => import("src/pages/superadmin/SaasDashboard.vue"),
+      },
+      {
+        path: "restaurants",
+        name: "saas-restaurants",
+        component: () => import("src/pages/superadmin/RestaurantList.vue"),
+      },
+      {
+        path: "plans",
+        name: "saas-plans",
+        component: () => import("src/pages/superadmin/SubscriptionPlans.vue"),
+      },
+    ],
+  },
+
+  // --- Main Admin / Restaurant Dashboard Layout ---
   {
     path: "/",
     component: () => import("layouts/AdminLayout.vue"),
-    meta: { requiresAuth: true }, // এটি authGuard চেক করবে
+    meta: { requiresAuth: true },
     children: [
       {
         path: "",
@@ -122,7 +146,7 @@ const routes = [
     ],
   },
 
-  // --- POS / Billing Layout (Dedicated Layout for Fast Operation) ---
+  // --- POS / Billing Layout ---
   {
     path: "/pos",
     component: () => import("layouts/PosLayout.vue"),
@@ -149,7 +173,7 @@ const routes = [
   // --- Kitchen Panel Layout ---
   {
     path: "/kitchen",
-    component: () => import("layouts/MainLayout.vue"), // অথবা KitchenLayout
+    component: () => import("layouts/MainLayout.vue"),
     meta: { requiresAuth: true },
     children: [
       {
@@ -207,7 +231,7 @@ const routes = [
     ],
   },
 
-  // --- Always leave this at last ---
+  // --- Error 404 ---
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
