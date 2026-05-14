@@ -1,50 +1,72 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-indigo-10 text-white">
+
+    <!-- HEADER -->
+    <q-header elevated class="bg-purple text-white">
       <q-toolbar>
-        <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
-        <q-toolbar-title>SaaS Master Control</q-toolbar-title>
-        <q-btn flat round icon="account_circle" />
+        <q-btn flat dense round icon="menu" @click="toggleLeftDrawer" />
+
+        <q-toolbar-title>SaaS Super Admin</q-toolbar-title>
+
+        <q-space />
+
+        <q-btn flat icon="logout" label="Logout" @click="logout" />
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="drawer" show-if-above bordered class="bg-indigo-1">
-      <q-scroll-area class="fit">
-        <q-list padding>
-          <q-item-label header class="text-indigo-10">Administration</q-item-label>
-          <q-item clickable v-ripple to="/superadmin/dashboard">
-            <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
-            <q-item-section>Master Dashboard</q-item-section>
-          </q-item>
-          <q-item clickable v-ripple to="/superadmin/restaurants">
-            <q-item-section avatar><q-icon name="storefront" /></q-item-section>
-            <q-item-section>Restaurants</q-item-section>
-          </q-item>
-          <q-item clickable v-ripple to="/superadmin/plans">
-            <q-item-section avatar><q-icon name="card_membership" /></q-item-section>
-            <q-item-section>Pricing Plans</q-item-section>
-          </q-item>
-          <q-separator spaced />
-          <q-item clickable v-ripple to="/auth/login" class="text-red">
-            <q-item-section avatar><q-icon name="logout" color="red" /></q-item-section>
-            <q-item-section>Logout</q-item-section>
-          </q-item>
-        </q-list>
-      </q-scroll-area>
+    <!-- DRAWER -->
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+      <q-list>
+
+        <q-item-label header>Super Admin Menu</q-item-label>
+
+        <q-item clickable v-ripple to="/superadmin/dashboard">
+          <q-item-section avatar>
+            <q-icon name="dashboard" />
+          </q-item-section>
+          <q-item-section>Dashboard</q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/superadmin/restaurants">
+          <q-item-section avatar>
+            <q-icon name="store" />
+          </q-item-section>
+          <q-item-section>Restaurants</q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/superadmin/plans">
+          <q-item-section avatar>
+            <q-icon name="payments" />
+          </q-item-section>
+          <q-item-section>Subscription Plans</q-item-section>
+        </q-item>
+
+      </q-list>
     </q-drawer>
 
-    <q-page-container class="bg-grey-2">
+    <!-- PAGE -->
+    <q-page-container>
       <router-view />
     </q-page-container>
+
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue'
-export default {
-  setup() {
-    const drawer = ref(false)
-    return { drawer }
-  }
-}
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const leftDrawerOpen = ref(true);
+
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
+
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  router.push("/auth/login");
+};
 </script>

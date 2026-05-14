@@ -1,33 +1,50 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-card class="login-card shadow-24">
-      <q-card-section class="bg-primary text-white text-center q-pa-lg">
-        <div class="text-h5 text-weight-bold">Restaurant SaaS</div>
+  <q-page class="flex flex-center bg-grey-2">
+    <q-card style="width: 400px; max-width: 90vw" class="q-pa-md shadow-10">
+
+      <q-card-section class="text-center bg-primary text-white">
+        <div class="text-h6">Restaurant SaaS</div>
         <div class="text-subtitle2">Login to your dashboard</div>
       </q-card-section>
 
-      <q-card-section class="q-pa-md">
-        <q-form @submit="handleLogin" class="q-gutter-md">
+      <q-card-section class="q-pt-lg">
+        <q-form @submit.prevent="handleLogin">
+
+          <!-- EMAIL -->
           <q-input
-            filled
             v-model="email"
             label="Email Address"
+            outlined
             type="email"
             lazy-rules
-            :rules="[val => val && val.length > 0 || 'Email is required']"
+            :rules="[
+              val => !!val || 'Email is required',
+              val => val.includes('@') || 'Enter a valid email'
+            ]"
+            class="q-mb-md"
           >
-            <template v-slot:prepend><q-icon name="email" /></template>
+            <template v-slot:prepend>
+              <q-icon name="email" />
+            </template>
           </q-input>
 
+          <!-- PASSWORD -->
           <q-input
-            filled
             v-model="password"
             label="Password"
+            outlined
             :type="showPassword ? 'text' : 'password'"
             lazy-rules
-            :rules="[val => val && val.length >= 6 || 'Min 6 characters']"
+            :rules="[
+              val => !!val || 'Password is required',
+              val => val.length >= 6 || 'Min 6 characters'
+            ]"
+            class="q-mb-md"
           >
-            <template v-slot:prepend><q-icon name="lock" /></template>
+            <template v-slot:prepend>
+              <q-icon name="lock" />
+            </template>
+
             <template v-slot:append>
               <q-icon
                 :name="showPassword ? 'visibility' : 'visibility_off'"
@@ -37,88 +54,115 @@
             </template>
           </q-input>
 
-          <div class="row items-center justify-between">
+          <div class="row items-center justify-between q-mb-md">
             <q-checkbox v-model="rememberMe" label="Remember me" />
-            <q-btn flat color="primary" label="Forgot Password?" dense />
+            <q-btn flat label="Forgot Password?" color="primary" />
           </div>
 
           <q-btn
             label="Login"
             type="submit"
             color="primary"
-            class="full-width q-py-sm"
+            class="full-width"
+            size="lg"
             :loading="loading"
           />
-
-          <div class="text-center q-mt-md">
-            Don't have an account?
-            <q-btn flat color="secondary" label="Register Now" to="/auth/register" />
-          </div>
         </q-form>
+
+        <div class="text-center q-mt-md">
+          Don't have an account?
+          <q-btn flat label="Register Now" color="positive" to="/auth/register" />
+        </div>
       </q-card-section>
+
+      <!-- Demo Account Info -->
+      <q-separator class="q-mt-md" />
+
+      <q-card-section>
+        <div class="text-caption text-grey-7">
+          <b>Demo Login Accounts:</b><br />
+          superadmin@gmail.com / 123456 <br />
+          admin@gmail.com / 123456 <br />
+          manager@gmail.com / 123456 <br />
+          waiter@gmail.com / 123456 <br />
+          kitchen@gmail.com / 123456
+        </div>
+      </q-card-section>
+
     </q-card>
   </q-page>
 </template>
 
-<script>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
-export default {
-  name: 'LoginPage',
-  setup() {
-    const $q = useQuasar()
-    const router = useRouter()
+const $q = useQuasar();
+const router = useRouter();
 
-    const email = ref('')
-    const password = ref('')
-    const showPassword = ref(false)
-    const rememberMe = ref(false)
-    const loading = ref(false)
+const email = ref("");
+const password = ref("");
 
-    const handleLogin = () => {
-      loading.value = true
+const rememberMe = ref(false);
+const showPassword = ref(false);
+const loading = ref(false);
 
-      // API Integration Point: Replace with actual axios call
-      setTimeout(() => {
-        const userData = {
-          token: 'token_' + Math.random().toString(36).substr(2),
-          email: email.value,
-          role: 'admin',
-          restaurant_id: 101
-        }
+// Demo users list
+const demoUsers = [
+  { email: "superadmin@gmail.com", password: "123456", role: "superadmin" },
+  { email: "admin@gmail.com", password: "123456", role: "admin" },
+  { email: "manager@gmail.com", password: "123456", role: "manager" },
+  { email: "waiter@gmail.com", password: "123456", role: "waiter" },
+  { email: "kitchen@gmail.com", password: "123456", role: "kitchen" },
+];
 
-        // 3. Local Storage Data Save
-        localStorage.setItem('user_session', JSON.stringify(userData))
+const handleLogin = () => {
+  loading.value = true;
 
-        $q.notify({
-          color: 'positive',
-          message: 'Login Successful!',
-          icon: 'check'
-        })
+  setTimeout(() => {
+    const user = demoUsers.find(
+      (u) => u.email === email.value && u.password === password.value
+    );
 
-        loading.value = false
-        router.push('/')
-      }, 1500)
+    if (!user) {
+      loading.value = false;
+      $q.notify({
+        type: "negative",
+        message: "Invalid email or password!",
+        position: "top",
+      });
+      return;
     }
 
-    return {
-      email,
-      password,
-      showPassword,
-      rememberMe,
-      loading,
-      handleLogin
+    // Save token + user in localStorage
+    localStorage.setItem("token", "demo-token-123456");
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        email: user.email,
+        role: user.role,
+      })
+    );
+
+    loading.value = false;
+
+    $q.notify({
+      type: "positive",
+      message: "Login Successful!",
+      position: "top",
+    });
+
+    // Redirect based on role
+    if (user.role === "superadmin") {
+      router.push("/superadmin/dashboard");
+    } else if (user.role === "waiter") {
+      router.push("/waiter/place-order");
+    } else if (user.role === "kitchen") {
+      router.push("/kitchen/display");
+    } else {
+      router.push("/dashboard");
     }
-  }
-}
+  }, 800);
+};
 </script>
-
-<style scoped>
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-}
-</style>

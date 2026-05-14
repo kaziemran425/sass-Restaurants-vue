@@ -1,10 +1,14 @@
-// src/router/routes.js
+import { h } from "vue";
+import { RouterView } from "vue-router";
 
 const routes = [
-  // --- Auth Layout & Pages ---
+  // ==========================================================
+  // AUTH ROUTES (Public)
+  // ==========================================================
   {
     path: "/auth",
     component: () => import("layouts/AuthLayout.vue"),
+    redirect: "/auth/login",
     children: [
       {
         path: "login",
@@ -19,45 +23,166 @@ const routes = [
     ],
   },
 
-  // --- Super Admin Layout (SaaS Master Control) ---
+  // ==========================================================
+  // SUPER ADMIN ROUTES (SaaS Owner)
+  // ==========================================================
   {
     path: "/superadmin",
-    component: () => import("src/layouts/SuperAdminLayout.vue"),
+    component: () => import("layouts/SuperAdminLayout.vue"),
     meta: { requiresAuth: true, role: "superadmin" },
+    redirect: "/superadmin/dashboard",
     children: [
       {
         path: "dashboard",
-        name: "saas-dashboard",
-        component: () => import("src/pages/superadmin/SaasDashboard.vue"),
+        name: "superadmin-dashboard",
+        component: () => import("pages/superadmin/SaasDashboard.vue"),
       },
       {
         path: "restaurants",
-        name: "saas-restaurants",
-        component: () => import("src/pages/superadmin/RestaurantList.vue"),
+        name: "superadmin-restaurants",
+        component: () => import("pages/superadmin/RestaurantList.vue"),
       },
       {
         path: "plans",
-        name: "saas-plans",
-        component: () => import("src/pages/superadmin/SubscriptionPlans.vue"),
+        name: "superadmin-plans",
+        component: () => import("pages/superadmin/SubscriptionPlans.vue"),
       },
     ],
   },
 
-  // --- Main Admin / Restaurant Dashboard Layout ---
+  // ==========================================================
+  // KITCHEN PANEL (Restaurant Staff)
+  // ==========================================================
+  {
+    path: "/kitchen",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: { requiresAuth: true, role: ["admin", "kitchen"] },
+    redirect: "/kitchen/display",
+    children: [
+      {
+        path: "display",
+        name: "kitchen-display",
+        component: () => import("pages/KitchenPanel/KitchenDisplay.vue"),
+      },
+      {
+        path: "queue",
+        name: "kitchen-queue",
+        component: () => import("pages/KitchenPanel/OrdersQueue.vue"),
+      },
+      {
+        path: "status",
+        name: "kitchen-status",
+        component: () => import("pages/KitchenPanel/FoodStatus.vue"),
+      },
+    ],
+  },
+
+  // ==========================================================
+  // WAITER PANEL (Mobile Friendly)
+  // ==========================================================
+  {
+    path: "/waiter",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: { requiresAuth: true, role: ["admin", "waiter"] },
+    redirect: "/waiter/place-order",
+    children: [
+      {
+        path: "place-order",
+        name: "waiter-place-order",
+        component: () => import("pages/WaiterPanel/PlaceOrder.vue"),
+      },
+      {
+        path: "tables",
+        name: "waiter-tables",
+        component: () => import("pages/WaiterPanel/TableOrders.vue"),
+      },
+      {
+        path: "serve-status",
+        name: "waiter-serve-status",
+        component: () => import("pages/WaiterPanel/ServeStatus.vue"),
+      },
+    ],
+  },
+
+  // ==========================================================
+  // ADMIN PANEL (Restaurant Admin Dashboard)
+  // ==========================================================
   {
     path: "/",
     component: () => import("layouts/AdminLayout.vue"),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: ["admin", "manager"] },
+    redirect: "/dashboard",
     children: [
+      // ----------------------------
+      // DASHBOARD
+      // ----------------------------
       {
-        path: "",
+        path: "dashboard",
         name: "dashboard",
         component: () => import("pages/IndexPage.vue"),
       },
 
-      // HR Management Panel
+      // ----------------------------
+      // BILLING PANEL (Your BillingPanel folder)
+      // ----------------------------
+      {
+        path: "billing",
+        component: { render: () => h(RouterView) },
+        children: [
+          {
+            path: "",
+            name: "billing-dashboard",
+            component: () => import("pages/BillingPanel/DashboardPanel.vue"),
+          },
+          {
+            path: "pos",
+            name: "billing-pos",
+            component: () => import("pages/BillingPanel/PosHome.vue"),
+          },
+          {
+            path: "invoices",
+            name: "billing-invoices",
+            component: () => import("pages/BillingPanel/AllInvoice.vue"),
+          },
+          {
+            path: "upcoming-orders",
+            name: "billing-upcoming-orders",
+            component: () => import("pages/BillingPanel/UpcomingOrder.vue"),
+          },
+        ],
+      },
+
+      // ----------------------------
+      // POS MODULE (Your src/pages/pos folder)
+      // ----------------------------
+      {
+        path: "pos",
+        component: { render: () => h(RouterView) },
+        children: [
+          {
+            path: "",
+            name: "pos-terminal",
+            component: () => import("pages/pos/TerminalPage.vue"),
+          },
+          {
+            path: "invoices",
+            name: "pos-invoices",
+            component: () => import("pages/pos/InvoicesPage.vue"),
+          },
+          {
+            path: "orders",
+            name: "pos-orders",
+            component: () => import("pages/pos/OrdersManagement.vue"),
+          },
+        ],
+      },
+
+      // ----------------------------
+      // HRM PANEL
+      // ----------------------------
       {
         path: "hrm",
+        component: { render: () => h(RouterView) },
         children: [
           {
             path: "employees",
@@ -87,58 +212,67 @@ const routes = [
         ],
       },
 
-      // Inventory Panel
+      // ----------------------------
+      // INVENTORY PANEL
+      // ----------------------------
       {
         path: "inventory",
+        component: { render: () => h(RouterView) },
         children: [
           {
             path: "stock-in",
-            name: "inv-stock-in",
+            name: "inventory-stock-in",
             component: () => import("pages/InventoryPanel/StockIn.vue"),
           },
           {
             path: "reports",
-            name: "inv-reports",
+            name: "inventory-reports",
             component: () => import("pages/InventoryPanel/StockReport.vue"),
           },
           {
             path: "suppliers",
-            name: "inv-suppliers",
+            name: "inventory-suppliers",
             component: () => import("pages/InventoryPanel/SupplierList.vue"),
           },
         ],
       },
 
-      // Accounting Panel
+      // ----------------------------
+      // ACCOUNTING PANEL
+      // ----------------------------
       {
         path: "accounting",
+        component: { render: () => h(RouterView) },
         children: [
           {
             path: "income",
-            name: "acc-income",
+            name: "accounting-income",
             component: () => import("pages/AccountingPanel/IncomeReport.vue"),
           },
           {
             path: "expenses",
-            name: "acc-expenses",
+            name: "accounting-expenses",
             component: () => import("pages/AccountingPanel/ExpenseEntry.vue"),
           },
         ],
       },
 
-      // Settings Panel
+      // ----------------------------
+      // SETTINGS PANEL
+      // ----------------------------
       {
         path: "settings",
+        component: { render: () => h(RouterView) },
         children: [
           {
             path: "restaurant",
-            name: "set-restaurant",
+            name: "settings-restaurant",
             component: () =>
               import("pages/SettingsPanel/RestaurantSettings.vue"),
           },
           {
             path: "users",
-            name: "set-users",
+            name: "settings-users",
             component: () => import("pages/SettingsPanel/UserManagement.vue"),
           },
         ],
@@ -146,74 +280,9 @@ const routes = [
     ],
   },
 
-  // --- POS / Billing Layout ---
-  {
-    path: "/pos",
-    component: () => import("layouts/PosLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "pos-home",
-        component: () => import("pages/BillingPanel/PosHome.vue"),
-      },
-      {
-        path: "invoices",
-        name: "pos-invoices",
-        component: () => import("pages/BillingPanel/AllInvoice.vue"),
-      },
-      {
-        path: "upcoming",
-        name: "pos-upcoming",
-        component: () => import("pages/BillingPanel/UpcomingOrder.vue"),
-      },
-    ],
-  },
-
-  // --- Kitchen Panel Layout ---
-  {
-    path: "/kitchen",
-    component: () => import("layouts/MainLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "kitchen-display",
-        component: () => import("pages/KitchenPanel/KitchenDisplay.vue"),
-      },
-      {
-        path: "queue",
-        name: "kitchen-queue",
-        component: () => import("pages/KitchenPanel/OrdersQueue.vue"),
-      },
-      {
-        path: "status",
-        name: "kitchen-status",
-        component: () => import("pages/KitchenPanel/FoodStatus.vue"),
-      },
-    ],
-  },
-
-  // --- Waiter Panel ---
-  {
-    path: "/waiter",
-    component: () => import("layouts/MainLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "place-order",
-        name: "waiter-order",
-        component: () => import("pages/WaiterPanel/PlaceOrder.vue"),
-      },
-      {
-        path: "tables",
-        name: "waiter-tables",
-        component: () => import("pages/WaiterPanel/TableOrders.vue"),
-      },
-    ],
-  },
-
-  // --- QR Menu (Public Access) ---
+  // ==========================================================
+  // QR MENU (PUBLIC)
+  // ==========================================================
   {
     path: "/menu",
     component: () => import("layouts/MainLayout.vue"),
@@ -231,9 +300,12 @@ const routes = [
     ],
   },
 
-  // --- Error 404 ---
+  // ==========================================================
+  // ERROR 404
+  // ==========================================================
   {
     path: "/:catchAll(.*)*",
+    name: "not-found",
     component: () => import("pages/ErrorNotFound.vue"),
   },
 ];

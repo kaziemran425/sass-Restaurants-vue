@@ -1,28 +1,37 @@
-// src/router/routeGuards.js
+export default function authGuard(to, from, next) {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-export const setupRouteGuards = (router) => {
-  router.beforeEach((to, from, next) => {
-    // Local Storage থেকে ইউজার সেশন চেক করা
-    const userSession = localStorage.getItem("user_session");
-    const isAuthenticated = userSession !== null;
+  // যদি route public হয়
+  if (!to.meta.requiresAuth) {
+    return next();
+  }
 
-    // যদি রুটটি 'requiresAuth' মেটা ট্যাগ ধারণ করে এবং ইউজার লগইন না থাকে
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-      if (!isAuthenticated) {
-        // লগইন না থাকলে লগইন পেজে পাঠিয়ে দিন
-        next({
-          path: "/auth/login",
-          query: { redirect: to.fullPath }, // যে পেজে যেতে চেয়েছিল তার পাথ সেভ রাখা
-        });
-      } else {
-        next(); // লগইন থাকলে যেতে দিন
+  // যদি login না থাকে
+  if (!token) {
+    return next("/auth/login");
+  }
+
+  // role check
+  const routeRole = to.meta.role;
+
+  if (routeRole) {
+    const userRole = user.role;
+
+    // যদি routeRole array হয়
+    if (Array.isArray(routeRole)) {
+      if (!routeRole.includes(userRole)) {
+        return next("/dashboard");
       }
     }
-    // যদি ইউজার লগইন থাকে এবং সে পুনরায় লগইন বা রেজিস্ট্রেশন পেজে যেতে চায়
-    else if (to.path.startsWith("/auth") && isAuthenticated) {
-      next({ path: "/" }); // তাকে ড্যাশবোর্ডে পাঠিয়ে দিন
-    } else {
-      next(); // অন্য সব ক্ষেত্রে সাধারণ অনুমতি
+
+    // যদি routeRole string হয়
+    if (typeof routeRole === "string") {
+      if (routeRole !== userRole) {
+        return next("/dashboard");
+      }
     }
-  });
-};
+  }
+
+  next();
+}
