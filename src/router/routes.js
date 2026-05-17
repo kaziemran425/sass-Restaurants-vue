@@ -2,6 +2,11 @@ import { h } from "vue";
 import { RouterView } from "vue-router";
 
 const routes = [
+  {
+    path: "/",
+    name: "landing",
+    component: () => import("pages/LandingPanel/LandingPage.vue"), // এখানে কোনো লেআউট নেই, একদম ক্লিন পেজ
+  },
   // ==========================================================
   // AUTH ROUTES (Public)
   // ==========================================================

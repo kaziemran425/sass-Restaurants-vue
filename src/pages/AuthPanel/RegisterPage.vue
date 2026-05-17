@@ -1,129 +1,173 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-card class="register-card shadow-24">
-      <q-card-section class="bg-secondary text-white text-center q-pa-lg">
-        <div class="text-h5 text-weight-bold">Start Your SaaS Journey</div>
-        <div class="text-subtitle2">Register your restaurant</div>
+  <q-page class="flex flex-center bg-grey-2">
+    <q-card style="width: 450px; max-width: 90vw" class="q-pa-md shadow-10">
+
+      <q-card-section class="text-center bg-primary text-white">
+        <div class="text-h6">Restaurant SaaS</div>
+        <div class="text-subtitle2">Create your restaurant account</div>
       </q-card-section>
 
-      <q-card-section class="q-pa-md">
-        <q-form @submit="handleRegister" class="q-gutter-sm">
+      <q-card-section class="q-pt-lg">
+        <q-form @submit.prevent="handleRegister">
+
+          <!-- FULL NAME -->
           <q-input
-            filled
-            v-model="fullName"
+            v-model="name"
             label="Full Name"
+            outlined
+            lazy-rules
             :rules="[val => !!val || 'Name is required']"
-          />
+            class="q-mb-md"
+          >
+            <template v-slot:prepend>
+              <q-icon name="person" />
+            </template>
+          </q-input>
 
+          <!-- EMAIL -->
           <q-input
-            filled
-            v-model="restaurantName"
-            label="Restaurant Name"
-            :rules="[val => !!val || 'Restaurant name is required']"
-          />
-
-          <q-input
-            filled
             v-model="email"
-            label="Email"
+            label="Email Address"
+            outlined
             type="email"
-            :rules="[val => !!val || 'Email is required']"
-          />
+            lazy-rules
+            :rules="[
+              val => !!val || 'Email is required',
+              val => val.includes('@') || 'Enter a valid email'
+            ]"
+            class="q-mb-md"
+          >
+            <template v-slot:prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
 
+          <!-- PASSWORD -->
           <q-input
-            filled
             v-model="password"
             label="Password"
-            type="password"
-            :rules="[val => val.length >= 6 || 'Min 6 characters']"
+            outlined
+            :type="showPassword ? 'text' : 'password'"
+            lazy-rules
+            :rules="[
+              val => !!val || 'Password is required',
+              val => val.length >= 6 || 'Min 6 characters'
+            ]"
+            class="q-mb-md"
+          >
+            <template v-slot:prepend>
+              <q-icon name="lock" />
+            </template>
+
+            <template v-slot:append>
+              <q-icon
+                :name="showPassword ? 'visibility' : 'visibility_off'"
+                class="cursor-pointer"
+                @click="showPassword = !showPassword"
+              />
+            </template>
+          </q-input>
+
+          <!-- ROLE -->
+          <q-select
+            v-model="role"
+            label="Select Role"
+            outlined
+            :options="roleOptions"
+            lazy-rules
+            :rules="[val => !!val || 'Role is required']"
+            class="q-mb-md"
+          >
+            <template v-slot:prepend>
+              <q-icon name="verified_user" />
+            </template>
+          </q-select>
+
+          <q-btn
+            label="Register"
+            type="submit"
+            color="positive"
+            class="full-width"
+            size="lg"
+            :loading="loading"
           />
-
-          <q-checkbox
-            v-model="terms"
-            label="I agree to the terms and conditions"
-            :rules="[val => val === true || 'Must agree to terms']"
-          />
-
-          <div class="q-mt-md">
-            <q-btn
-              label="Create Account"
-              type="submit"
-              color="secondary"
-              class="full-width q-py-sm"
-              :loading="loading"
-              :disabled="!terms"
-            />
-          </div>
-
-          <div class="text-center q-mt-md">
-            Already have an account?
-            <q-btn flat color="primary" label="Login" to="/auth/login" />
-          </div>
         </q-form>
+
+        <div class="text-center q-mt-md">
+          Already have an account?
+          <q-btn flat label="Login Now" color="primary" to="/auth/login" />
+        </div>
       </q-card-section>
+
     </q-card>
   </q-page>
 </template>
 
-<script>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
-export default {
-  name: 'RegisterPage',
-  setup() {
-    const $q = useQuasar()
-    const router = useRouter()
+const $q = useQuasar();
+const router = useRouter();
 
-    const fullName = ref('')
-    const restaurantName = ref('')
-    const email = ref('')
-    const password = ref('')
-    const terms = ref(false)
-    const loading = ref(false)
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const role = ref(null);
 
-    const handleRegister = () => {
-      loading.value = true
+const loading = ref(false);
+const showPassword = ref(false);
 
-      setTimeout(() => {
-        // Local Storage temporary save
-        const registrationData = {
-          user: fullName.value,
-          restaurant: restaurantName.value,
-          email: email.value
-        }
+const roleOptions = [
+  { label: "Admin", value: "admin" },
+  { label: "Manager", value: "manager" },
+  { label: "Waiter", value: "waiter" },
+  { label: "Kitchen", value: "kitchen" },
+];
 
-        localStorage.setItem('pending_verification', JSON.stringify(registrationData))
+const handleRegister = () => {
+  loading.value = true;
 
-        $q.notify({
-          color: 'info',
-          message: 'Account created! Please login.',
-          icon: 'info'
-        })
+  setTimeout(() => {
+    // Load old users from localStorage
+    const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
 
-        loading.value = false
-        router.push('/auth/login')
-      }, 2000)
+    // Check duplicate email
+    const alreadyExists = storedUsers.find((u) => u.email === email.value);
+
+    if (alreadyExists) {
+      loading.value = false;
+      $q.notify({
+        type: "negative",
+        message: "This email is already registered!",
+        position: "top",
+      });
+      return;
     }
 
-    return {
-      fullName,
-      restaurantName,
-      email,
-      password,
-      terms,
-      loading,
-      handleRegister
-    }
-  }
-}
+    // New user object
+    const newUser = {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+      role: role.value.value,
+    };
+
+    storedUsers.push(newUser);
+
+    // Save to localStorage
+    localStorage.setItem("registeredUsers", JSON.stringify(storedUsers));
+
+    loading.value = false;
+
+    $q.notify({
+      type: "positive",
+      message: "Registration Successful! Now Login.",
+      position: "top",
+    });
+
+    router.push("/auth/login");
+  }, 800);
+};
 </script>
-
-<style scoped>
-.register-card {
-  width: 100%;
-  max-width: 450px;
-  border-radius: 12px;
-}
-</style>

@@ -108,20 +108,29 @@ const rememberMe = ref(false);
 const showPassword = ref(false);
 const loading = ref(false);
 
-// Demo users list
+// Default Demo Users
 const demoUsers = [
-  { email: "superadmin@gmail.com", password: "123456", role: "superadmin" },
-  { email: "admin@gmail.com", password: "123456", role: "admin" },
-  { email: "manager@gmail.com", password: "123456", role: "manager" },
-  { email: "waiter@gmail.com", password: "123456", role: "waiter" },
-  { email: "kitchen@gmail.com", password: "123456", role: "kitchen" },
+  { email: "superadmin@gmail.com", password: "123456", role: "superadmin", name: "Super Admin" },
+  { email: "admin@gmail.com", password: "123456", role: "admin", name: "Restaurant Admin" },
+  { email: "manager@gmail.com", password: "123456", role: "manager", name: "Manager" },
+  { email: "waiter@gmail.com", password: "123456", role: "waiter", name: "Waiter" },
+  { email: "kitchen@gmail.com", password: "123456", role: "kitchen", name: "Kitchen Staff" },
 ];
 
 const handleLogin = () => {
   loading.value = true;
 
   setTimeout(() => {
-    const user = demoUsers.find(
+    // Load Registered Users
+    const registeredUsers = JSON.parse(
+      localStorage.getItem("registeredUsers") || "[]"
+    );
+
+    // Merge demo users + registered users
+    const allUsers = [...demoUsers, ...registeredUsers];
+
+    // Find user
+    const user = allUsers.find(
       (u) => u.email === email.value && u.password === password.value
     );
 
@@ -135,11 +144,12 @@ const handleLogin = () => {
       return;
     }
 
-    // Save token + user in localStorage
+    // Save token + user info
     localStorage.setItem("token", "demo-token-123456");
     localStorage.setItem(
       "user",
       JSON.stringify({
+        name: user.name || "User",
         email: user.email,
         role: user.role,
       })
