@@ -46,14 +46,13 @@
 
         <template v-slot:body-cell-actions="props">
           <q-td :props="props" class="text-right">
-            <q-btn flat round dense color="primary" icon="visibility" size="sm" class="q-mr-xs" />
+            <q-btn flat round dense color="primary" icon="visibility" size="sm" class="q-mr-xs" @click="openEditDialog(props.row)" />
             <q-btn flat round dense color="negative" icon="delete" size="sm" @click="deleteTenant(props.row.id)" />
           </q-td>
         </template>
       </q-table>
     </q-card>
 
-    <!-- Add Tenant Dialog -->
     <q-dialog v-model="tenantDialog" persistent>
       <q-card style="min-width: 400px; border-radius: 12px;">
         <q-card-section class="bg-indigo text-white row items-center justify-between">
@@ -82,6 +81,36 @@
         </q-form>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="editDialog" persistent>
+      <q-card style="min-width: 400px; border-radius: 12px;">
+        <q-card-section class="bg-primary text-white row items-center justify-between">
+          <div class="text-h6">Edit Tenant Information</div>
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-form @submit.prevent="updateTenant">
+          <q-card-section class="q-pt-md q-gutter-sm">
+            <q-input filled v-model="editForm.name" label="Restaurant Name *" dense :rules="[val => !!val || 'Required']" />
+            <q-input filled v-model="editForm.owner" label="Owner Name *" dense :rules="[val => !!val || 'Required']" />
+            <q-input filled v-model="editForm.email" label="Email Address *" type="email" dense :rules="[val => !!val || 'Required']" />
+
+            <q-select
+              filled dense
+              v-model="editForm.plan"
+              :options="['Basic', 'Professional', 'Enterprise']"
+              label="Subscription Plan *"
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="bg-grey-1 q-pa-md">
+            <q-btn flat label="Cancel" color="grey" v-close-popup />
+            <q-btn unelevated label="Save Changes" type="submit" color="primary" :loading="isUpdating" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -99,6 +128,11 @@ export default {
     const tenants = ref([])
 
     const form = reactive({ name: '', owner: '', email: '', plan: 'Professional' })
+
+    // Edit specific state
+    const editDialog = ref(false)
+    const isUpdating = ref(false)
+    const editForm = reactive({ id: null, name: '', owner: '', email: '', plan: '' })
 
     const tenantCols = [
       { name: 'name', label: 'Restaurant', field: 'name', align: 'left', sortable: true },
@@ -147,6 +181,37 @@ export default {
       $q.notify({ color: 'positive', message: 'Tenant successfully created!', icon: 'check_circle' })
     }
 
+    // --- Edit Logic ---
+    const openEditDialog = (tenant) => {
+      editForm.id = tenant.id
+      editForm.name = tenant.name
+      editForm.owner = tenant.owner
+      editForm.email = tenant.email
+      editForm.plan = tenant.plan
+      editDialog.value = true
+    }
+
+    const updateTenant = async () => {
+      isUpdating.value = true
+      await new Promise(res => setTimeout(res, 500))
+
+      const index = tenants.value.findIndex(t => t.id === editForm.id)
+      if (index !== -1) {
+        tenants.value[index] = {
+          ...tenants.value[index], // Keep other properties like status intact
+          name: editForm.name,
+          owner: editForm.owner,
+          email: editForm.email,
+          plan: editForm.plan,
+          fee: getFeeByPlan(editForm.plan) // Update fee if plan was changed
+        }
+      }
+
+      isUpdating.value = false
+      editDialog.value = false
+      $q.notify({ color: 'positive', message: 'Tenant updated successfully!', icon: 'check_circle' })
+    }
+
     const updateStatus = async (tenant) => {
       $q.notify({
         color: tenant.status === 'Active' ? 'positive' : 'negative',
@@ -156,18 +221,42 @@ export default {
     }
 
     const deleteTenant = (id) => {
-      $q.dialog({ title: 'Danger Area', message: 'Are you sure you want to delete this tenant completely?', cancel: true, color: 'negative' })
-      .onOk(() => {
+      $q.dialog({
+        title: 'Danger Area',
+        message: 'Are you sure you want to delete this tenant completely?',
+        cancel: true,
+        color: 'negative'
+      }).onOk(() => {
         tenants.value = tenants.value.filter(t => t.id !== id)
         $q.notify({ color: 'negative', message: 'Tenant deleted', icon: 'delete' })
       })
     }
 
-    return { filter, tenantCols, tenants, tenantDialog, form, isLoading, isSaving, saveTenant, updateStatus, deleteTenant }
+    // Explicit return block exporting all state and methods to the template
+    return {
+      filter,
+      tenantCols,
+      tenants,
+      tenantDialog,
+      form,
+      isLoading,
+      isSaving,
+      saveTenant,
+      updateStatus,
+      deleteTenant,
+      editDialog,
+      editForm,
+      isUpdating,
+      openEditDialog,
+      updateTenant
+    }
   }
 }
 </script>
 
 <style scoped>
-.border-grey { border: 1px solid #ccc; border-radius: 4px; }
+.border-grey {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 </style>
