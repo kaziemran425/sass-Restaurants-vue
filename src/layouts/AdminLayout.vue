@@ -1,16 +1,9 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-
     <!-- HEADER -->
-    <q-header elevated class="bg-primary text-white">
+    <q-header elevated class="bg-teal-14 text-white">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>Restaurant Admin Panel</q-toolbar-title>
 
@@ -23,7 +16,6 @@
     <!-- DRAWER -->
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-
         <q-item-label header>Admin Menu</q-item-label>
 
         <q-item clickable v-ripple to="/dashboard">
@@ -119,7 +111,6 @@
             </q-item>
           </q-list>
         </q-expansion-item>
-
       </q-list>
     </q-drawer>
 
@@ -127,7 +118,6 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
   </q-layout>
 </template>
 
