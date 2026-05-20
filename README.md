@@ -24,8 +24,8 @@ quasar build
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
 
 
-```
 
+```
 sass-resturent-vue
 ├─ .editorconfig
 ├─ .npmrc
@@ -82,7 +82,8 @@ sass-resturent-vue
    │  │  └─ IncomeReport.vue
    │  ├─ AuthPanel
    │  │  ├─ LoginPage.vue
-   │  │  └─ RegisterPage.vue
+   │  │  ├─ RegisterPage.vue
+   │  │  └─ forgot-password.vue
    │  ├─ BillingPanel
    │  │  ├─ AllInvoice.vue
    │  │  ├─ DashboardPanel.vue
@@ -104,6 +105,8 @@ sass-resturent-vue
    │  │  ├─ FoodStatus.vue
    │  │  ├─ KitchenDisplay.vue
    │  │  └─ OrdersQueue.vue
+   │  ├─ LandingPanel
+   │  │  └─ LandingPage.vue
    │  ├─ QrMenuPanel
    │  │  ├─ QrMenuCategory.vue
    │  │  └─ QrMenuHome.vue
