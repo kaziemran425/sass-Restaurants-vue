@@ -50,9 +50,7 @@
               <q-item-section>Billing Dashboard</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/billing/pos">
-              <q-item-section>POS Home</q-item-section>
-            </q-item>
+          
 
             <q-item clickable v-ripple to="/admin/billing/invoices">
               <q-item-section>All Invoice</q-item-section>

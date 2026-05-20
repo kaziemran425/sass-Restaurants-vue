@@ -146,11 +146,7 @@ const routes = [
             name: "billing-dashboard",
             component: () => import("pages/BillingPanel/DashboardPanel.vue"),
           },
-          {
-            path: "pos",
-            name: "billing-pos",
-            component: () => import("pages/BillingPanel/PosHome.vue"),
-          },
+       
           {
             path: "invoices",
             name: "billing-invoices",
