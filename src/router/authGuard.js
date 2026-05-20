@@ -1,37 +1,39 @@
+// src/router/authGuard.js
+import { useAuth } from "src/composables/useAuth";
+
 export default function authGuard(to, from, next) {
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { isLoggedIn, getUserRole } = useAuth();
 
-  // যদি route public হয়
-  if (!to.meta.requiresAuth) {
-    return next();
+  const loggedIn = isLoggedIn();
+  const userRole = getUserRole();
+
+  // Guest only page (login/register/landing)
+  if (to.meta.guestOnly && loggedIn) {
+    return next(getRedirectPath(userRole));
   }
 
-  // যদি login না থাকে
-  if (!token) {
-    return next("/auth/login");
+  // Protected page requires login
+  if (to.meta.requiresAuth && !loggedIn) {
+    return next({ name: "login" });
   }
 
-  // role check
-  const routeRole = to.meta.role;
+  // Role check
+  if (to.meta.requiresAuth && to.meta.role) {
+    const allowedRoles = Array.isArray(to.meta.role)
+      ? to.meta.role
+      : [to.meta.role];
 
-  if (routeRole) {
-    const userRole = user.role;
-
-    // যদি routeRole array হয়
-    if (Array.isArray(routeRole)) {
-      if (!routeRole.includes(userRole)) {
-        return next("/dashboard");
-      }
-    }
-
-    // যদি routeRole string হয়
-    if (typeof routeRole === "string") {
-      if (routeRole !== userRole) {
-        return next("/dashboard");
-      }
+    if (!allowedRoles.includes(userRole)) {
+      return next(getRedirectPath(userRole));
     }
   }
 
-  next();
+  return next();
+}
+
+function getRedirectPath(role) {
+  if (role === "superadmin") return { name: "superadmin-dashboard" };
+  if (role === "kitchen") return { name: "kitchen-display" };
+  if (role === "waiter") return { name: "waiter-place-order" };
+  return { name: "dashboard" };
 }

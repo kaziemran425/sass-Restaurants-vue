@@ -1,104 +1,90 @@
 <template>
-  <q-page class="flex flex-center bg-grey-2">
-    <q-card style="width: 450px; max-width: 90vw" class="q-pa-md shadow-10">
-
-      <q-card-section class="text-center bg-primary text-white">
-        <div class="text-h6">Restaurant SaaS</div>
-        <div class="text-subtitle2">Create your restaurant account</div>
-      </q-card-section>
-
-      <q-card-section class="q-pt-lg">
-        <q-form @submit.prevent="handleRegister">
-
-          <!-- FULL NAME -->
-          <q-input
-            v-model="name"
-            label="Full Name"
-            outlined
-            lazy-rules
-            :rules="[val => !!val || 'Name is required']"
-            class="q-mb-md"
-          >
-            <template v-slot:prepend>
-              <q-icon name="person" />
-            </template>
-          </q-input>
-
-          <!-- EMAIL -->
-          <q-input
-            v-model="email"
-            label="Email Address"
-            outlined
-            type="email"
-            lazy-rules
-            :rules="[
-              val => !!val || 'Email is required',
-              val => val.includes('@') || 'Enter a valid email'
-            ]"
-            class="q-mb-md"
-          >
-            <template v-slot:prepend>
-              <q-icon name="email" />
-            </template>
-          </q-input>
-
-          <!-- PASSWORD -->
-          <q-input
-            v-model="password"
-            label="Password"
-            outlined
-            :type="showPassword ? 'text' : 'password'"
-            lazy-rules
-            :rules="[
-              val => !!val || 'Password is required',
-              val => val.length >= 6 || 'Min 6 characters'
-            ]"
-            class="q-mb-md"
-          >
-            <template v-slot:prepend>
-              <q-icon name="lock" />
-            </template>
-
-            <template v-slot:append>
-              <q-icon
-                :name="showPassword ? 'visibility' : 'visibility_off'"
-                class="cursor-pointer"
-                @click="showPassword = !showPassword"
-              />
-            </template>
-          </q-input>
-
-          <!-- ROLE -->
-          <q-select
-            v-model="role"
-            label="Select Role"
-            outlined
-            :options="roleOptions"
-            lazy-rules
-            :rules="[val => !!val || 'Role is required']"
-            class="q-mb-md"
-          >
-            <template v-slot:prepend>
-              <q-icon name="verified_user" />
-            </template>
-          </q-select>
-
-          <q-btn
-            label="Register"
-            type="submit"
-            color="positive"
-            class="full-width"
-            size="lg"
-            :loading="loading"
-          />
-        </q-form>
-
-        <div class="text-center q-mt-md">
-          Already have an account?
-          <q-btn flat label="Login Now" color="primary" to="/auth/login" />
+  <!-- Added a subtle background color to make the white card pop -->
+  <q-page class="flex flex-center bg-grey-1">
+    <!-- Modern card with shadow, padding, and rounded corners -->
+    <q-card class="q-pa-sm shadow-4" style="width: 400px; border-radius: 16px">
+      <!-- New Header with an Avatar Icon -->
+      <q-card-section class="text-center q-pb-none">
+        <q-avatar
+          size="64px"
+          color="teal-1"
+          text-color="primary"
+          class="q-mb-md bg-blue-1"
+        >
+          <q-icon name="person_add" size="32px" />
+        </q-avatar>
+        <div class="text-h5 text-bold text-teal-13">Create Account</div>
+        <div class="text-subtitle2 text-grey-6 q-mt-xs">
+          Please fill in the details below
         </div>
       </q-card-section>
 
+      <q-card-section>
+        <div class="q-gutter-y-md">
+          <!-- Inputs upgraded with outlines and prepend icons -->
+          <q-input v-model="name" label="Full Name" outlined color="primary">
+            <template v-slot:prepend>
+              <q-icon name="badge" class="text-grey-6" />
+            </template>
+          </q-input>
+
+          <q-input v-model="email" label="Email" outlined color="primary">
+            <template v-slot:prepend>
+              <q-icon name="email" class="text-grey-6" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="password"
+            label="Password"
+            type="password"
+            outlined
+            color="primary"
+          >
+            <template v-slot:prepend>
+              <q-icon name="lock" class="text-grey-6" />
+            </template>
+          </q-input>
+
+          <q-select
+            v-model="role"
+            :options="roles"
+            label="Select Role"
+            outlined
+            color="primary"
+          >
+            <template v-slot:prepend>
+              <q-icon name="work" class="text-grey-6" />
+            </template>
+          </q-select>
+        </div>
+      </q-card-section>
+
+      <!-- Upgraded Actions: Full width primary button with a centered login link -->
+      <q-card-section class="q-pt-none">
+        <q-btn
+          label="Register"
+          color="teal-13"
+          size="16px"
+          class="full-width q-mb-md text-bold"
+          unelevated
+          style="border-radius: 8px"
+          @click="handleRegister"
+        />
+
+        <div class="text-center q-mt-sm">
+          <span class="text-grey-7">Already have an account?</span>
+          <q-btn
+            flat
+            no-caps
+            dense
+            label="Login"
+            color="primary"
+            to="/auth/login"
+            class="q-ml-xs text-bold"
+          />
+        </div>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
@@ -106,68 +92,35 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
+import { useAuth } from "src/composables/useAuth";
 
-const $q = useQuasar();
 const router = useRouter();
+const { register } = useAuth();
 
 const name = ref("");
 const email = ref("");
 const password = ref("");
-const role = ref(null);
+const role = ref("waiter");
 
-const loading = ref(false);
-const showPassword = ref(false);
-
-const roleOptions = [
-  { label: "Admin", value: "admin" },
-  { label: "Manager", value: "manager" },
-  { label: "Waiter", value: "waiter" },
-  { label: "Kitchen", value: "kitchen" },
-];
+const roles = ["admin", "manager", "waiter", "kitchen", "superadmin"];
 
 const handleRegister = () => {
-  loading.value = true;
+  if (!name.value || !email.value || !password.value) {
+    alert("All fields are required!");
+    return;
+  }
 
-  setTimeout(() => {
-    // Load old users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+  const userData = {
+    id: Date.now(),
+    name: name.value,
+    email: email.value,
+    password: password.value,
+    role: role.value,
+  };
 
-    // Check duplicate email
-    const alreadyExists = storedUsers.find((u) => u.email === email.value);
+  register(userData);
 
-    if (alreadyExists) {
-      loading.value = false;
-      $q.notify({
-        type: "negative",
-        message: "This email is already registered!",
-        position: "top",
-      });
-      return;
-    }
-
-    // New user object
-    const newUser = {
-      name: name.value,
-      email: email.value,
-      password: password.value,
-      role: role.value.value,
-    };
-
-    storedUsers.push(newUser);
-
-    // Save to localStorage
-    localStorage.setItem("registeredUsers", JSON.stringify(storedUsers));
-
-    loading.value = false;
-
-    $q.notify({
-      type: "positive",
-      message: "Registration Successful! Now Login.",
-      position: "top",
-    });
-
-    router.push("/auth/login");
-  }, 800);
+  alert("Registration Successful! Now login.");
+  router.push("/auth/login");
 };
 </script>

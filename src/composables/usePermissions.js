@@ -1,27 +1,19 @@
 // src/composables/usePermissions.js
+import { computed } from "vue";
 import { useAuth } from "./useAuth";
 
 export function usePermissions() {
   const { getUserRole } = useAuth();
-  const role = getUserRole();
 
-  // রোল অনুযায়ী পারমিশন ম্যাপিং
-  const permissions = {
-    "Super Admin": ["all"],
-    Admin: ["dashboard", "hrm", "inventory", "accounting", "settings", "pos"],
-    Kitchen: ["kitchen_display", "food_status"],
-    Waiter: ["pos", "place_order", "serve_status"],
-    Cashier: ["pos", "billing_history"],
-  };
+  const role = computed(() => getUserRole());
 
-  const canAccess = (feature) => {
-    const userPermissions = permissions[role] || [];
-    if (userPermissions.includes("all")) return true;
-    return userPermissions.includes(feature);
+  const canAccess = (allowedRoles = []) => {
+    if (!allowedRoles.length) return true;
+    return allowedRoles.includes(role.value);
   };
 
   return {
+    role,
     canAccess,
-    currentRole: role,
   };
 }

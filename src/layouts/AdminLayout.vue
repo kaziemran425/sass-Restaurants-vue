@@ -9,7 +9,7 @@
 
         <q-space />
 
-        <q-btn flat icon="logout" label="Logout" @click="logout" />
+        <q-btn flat icon="logout" label="Logout" @click="handleLogout" />
       </q-toolbar>
     </q-header>
 
@@ -18,95 +18,115 @@
       <q-list>
         <q-item-label header>Admin Menu</q-item-label>
 
-        <q-item clickable v-ripple to="/dashboard">
+        <!-- Dashboard -->
+        <q-item clickable v-ripple to="/admin/dashboard">
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
           <q-item-section>Dashboard</q-item-section>
         </q-item>
 
+        <!-- POS -->
         <q-expansion-item icon="point_of_sale" label="POS">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/pos">
+            <q-item clickable v-ripple to="/admin/pos">
               <q-item-section>Terminal</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/pos/orders">
+
+            <q-item clickable v-ripple to="/admin/pos/orders">
               <q-item-section>Orders</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/pos/invoices">
+
+            <q-item clickable v-ripple to="/admin/pos/invoices">
               <q-item-section>Invoices</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
 
+        <!-- Billing -->
         <q-expansion-item icon="receipt_long" label="Billing">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/billing">
+            <q-item clickable v-ripple to="/admin/billing">
               <q-item-section>Billing Dashboard</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/billing/pos">
+
+            <q-item clickable v-ripple to="/admin/billing/pos">
               <q-item-section>POS Home</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/billing/invoices">
+
+            <q-item clickable v-ripple to="/admin/billing/invoices">
               <q-item-section>All Invoice</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/billing/upcoming-orders">
+
+            <q-item clickable v-ripple to="/admin/billing/upcoming-orders">
               <q-item-section>Upcoming Orders</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
 
+        <!-- HRM -->
         <q-expansion-item icon="people" label="HRM">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/hrm/employees">
+            <q-item clickable v-ripple to="/admin/hrm/employees">
               <q-item-section>Employees</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/hrm/attendance">
+
+            <q-item clickable v-ripple to="/admin/hrm/attendance">
               <q-item-section>Attendance</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/hrm/payroll">
+
+            <q-item clickable v-ripple to="/admin/hrm/payroll">
               <q-item-section>Payroll</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/hrm/leaves">
+
+            <q-item clickable v-ripple to="/admin/hrm/leaves">
               <q-item-section>Leave Requests</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/hrm/shifts">
+
+            <q-item clickable v-ripple to="/admin/hrm/shifts">
               <q-item-section>Shift Schedule</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
 
+        <!-- Inventory -->
         <q-expansion-item icon="inventory" label="Inventory">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/inventory/stock-in">
+            <q-item clickable v-ripple to="/admin/inventory/stock-in">
               <q-item-section>Stock In</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/inventory/reports">
+
+            <q-item clickable v-ripple to="/admin/inventory/reports">
               <q-item-section>Stock Report</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/inventory/suppliers">
+
+            <q-item clickable v-ripple to="/admin/inventory/suppliers">
               <q-item-section>Suppliers</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
 
+        <!-- Accounting -->
         <q-expansion-item icon="account_balance" label="Accounting">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/accounting/income">
+            <q-item clickable v-ripple to="/admin/accounting/income">
               <q-item-section>Income</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/accounting/expenses">
+
+            <q-item clickable v-ripple to="/admin/accounting/expenses">
               <q-item-section>Expenses</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
 
+        <!-- Settings -->
         <q-expansion-item icon="settings" label="Settings">
           <q-list class="q-pl-md">
-            <q-item clickable v-ripple to="/settings/restaurant">
+            <q-item clickable v-ripple to="/admin/settings/restaurant">
               <q-item-section>Restaurant Settings</q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/settings/users">
+
+            <q-item clickable v-ripple to="/admin/settings/users">
               <q-item-section>User Management</q-item-section>
             </q-item>
           </q-list>
@@ -124,18 +144,20 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuth } from "src/composables/useAuth";
 
 const router = useRouter();
+const { logout } = useAuth();
+
 const leftDrawerOpen = ref(true);
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
 
-const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
+// ✅ fixed logout function
+const handleLogout = () => {
+  logout();
   router.push("/auth/login");
 };
 </script>

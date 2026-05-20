@@ -1,19 +1,26 @@
+// src/router/routes.js
 import { h } from "vue";
 import { RouterView } from "vue-router";
 
 const routes = [
+  // ==========================================================
+  // LANDING PAGE (Public)
+  // ==========================================================
   {
     path: "/",
     name: "landing",
-    component: () => import("pages/LandingPanel/LandingPage.vue"), // এখানে কোনো লেআউট নেই, একদম ক্লিন পেজ
+    component: () => import("pages/LandingPanel/LandingPage.vue"),
+    meta: { guestOnly: true },
   },
+
   // ==========================================================
-  // AUTH ROUTES (Public)
+  // AUTH ROUTES
   // ==========================================================
   {
     path: "/auth",
     component: () => import("layouts/AuthLayout.vue"),
     redirect: "/auth/login",
+    meta: { guestOnly: true },
     children: [
       {
         path: "login",
@@ -25,16 +32,21 @@ const routes = [
         name: "register",
         component: () => import("pages/AuthPanel/RegisterPage.vue"),
       },
+      {
+        path: "forgot-password",
+        name: "forgot-password",
+        component: () => import("src/pages/AuthPanel/forgot-password.vue"),
+      },
     ],
   },
 
   // ==========================================================
-  // SUPER ADMIN ROUTES (SaaS Owner)
+  // SUPER ADMIN PANEL
   // ==========================================================
   {
     path: "/superadmin",
     component: () => import("layouts/SuperAdminLayout.vue"),
-    meta: { requiresAuth: true, role: "superadmin" },
+    meta: { requiresAuth: true, role: ["superadmin"] },
     redirect: "/superadmin/dashboard",
     children: [
       {
@@ -56,7 +68,7 @@ const routes = [
   },
 
   // ==========================================================
-  // KITCHEN PANEL (Restaurant Staff)
+  // KITCHEN PANEL
   // ==========================================================
   {
     path: "/kitchen",
@@ -83,7 +95,7 @@ const routes = [
   },
 
   // ==========================================================
-  // WAITER PANEL (Mobile Friendly)
+  // WAITER PANEL
   // ==========================================================
   {
     path: "/waiter",
@@ -110,26 +122,21 @@ const routes = [
   },
 
   // ==========================================================
-  // ADMIN PANEL (Restaurant Admin Dashboard)
+  // ADMIN PANEL (IMPORTANT FIX: /admin path use করা হয়েছে)
   // ==========================================================
   {
-    path: "/",
+    path: "/admin",
     component: () => import("layouts/AdminLayout.vue"),
     meta: { requiresAuth: true, role: ["admin", "manager"] },
-    redirect: "/dashboard",
+    redirect: "/admin/dashboard",
     children: [
-      // ----------------------------
-      // DASHBOARD
-      // ----------------------------
       {
         path: "dashboard",
         name: "dashboard",
         component: () => import("pages/IndexPage.vue"),
       },
 
-      // ----------------------------
-      // BILLING PANEL (Your BillingPanel folder)
-      // ----------------------------
+      // BILLING
       {
         path: "billing",
         component: { render: () => h(RouterView) },
@@ -157,9 +164,7 @@ const routes = [
         ],
       },
 
-      // ----------------------------
-      // POS MODULE (Your src/pages/pos folder)
-      // ----------------------------
+      // POS
       {
         path: "pos",
         component: { render: () => h(RouterView) },
@@ -182,9 +187,7 @@ const routes = [
         ],
       },
 
-      // ----------------------------
-      // HRM PANEL
-      // ----------------------------
+      // HRM
       {
         path: "hrm",
         component: { render: () => h(RouterView) },
@@ -217,9 +220,7 @@ const routes = [
         ],
       },
 
-      // ----------------------------
-      // INVENTORY PANEL
-      // ----------------------------
+      // INVENTORY
       {
         path: "inventory",
         component: { render: () => h(RouterView) },
@@ -242,9 +243,7 @@ const routes = [
         ],
       },
 
-      // ----------------------------
-      // ACCOUNTING PANEL
-      // ----------------------------
+      // ACCOUNTING
       {
         path: "accounting",
         component: { render: () => h(RouterView) },
@@ -262,9 +261,7 @@ const routes = [
         ],
       },
 
-      // ----------------------------
-      // SETTINGS PANEL
-      // ----------------------------
+      // SETTINGS
       {
         path: "settings",
         component: { render: () => h(RouterView) },
@@ -306,7 +303,7 @@ const routes = [
   },
 
   // ==========================================================
-  // ERROR 404
+  // 404
   // ==========================================================
   {
     path: "/:catchAll(.*)*",

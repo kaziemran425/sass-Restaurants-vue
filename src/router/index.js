@@ -1,8 +1,10 @@
+// src/router/index.js
+
 import { route } from "quasar/wrappers";
 import { createRouter, createWebHistory } from "vue-router";
 
-import routes from "./routes.js";
-import authGuard from "./authGuard.js";
+import routes from "./routes.js"; // ✅ .js must
+import authGuard from "./authGuard.js"; // ✅ .js must
 
 export default route(function () {
   const Router = createRouter({
@@ -11,7 +13,6 @@ export default route(function () {
     scrollBehavior: () => ({ left: 0, top: 0 }),
   });
 
-  // Global Guard
   Router.beforeEach((to, from, next) => {
     authGuard(to, from, next);
   });

@@ -2,13 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="bg-dark text-white">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>Main Panel</q-toolbar-title>
 
@@ -19,17 +13,17 @@
           flat
           icon="logout"
           label="Logout"
-          @click="logout"
+          @click="handleLogout"
         />
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-
         <q-item-label header>Quick Menu</q-item-label>
 
-        <q-item clickable v-ripple to="/dashboard">
+        <!-- FIX: Dashboard path should be /admin/dashboard -->
+        <q-item clickable v-ripple to="/admin/dashboard">
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
@@ -58,7 +52,6 @@
           </q-item-section>
           <q-item-section>QR Menu</q-item-section>
         </q-item>
-
       </q-list>
     </q-drawer>
 
@@ -71,22 +64,25 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAuth } from "src/composables/useAuth";
 
 const router = useRouter();
+const { isLoggedIn: checkLogin, logout } = useAuth();
+
 const leftDrawerOpen = ref(false);
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
 
+// ✅ reactive login check
 const isLoggedIn = computed(() => {
-  return !!localStorage.getItem("token");
+  return checkLogin();
 });
 
-const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
+// ✅ logout fixed
+const handleLogout = () => {
+  logout();
   router.push("/auth/login");
 };
 </script>

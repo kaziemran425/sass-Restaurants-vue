@@ -1,31 +1,54 @@
 // src/composables/useAuth.js
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from "vue";
+
+const user = ref(JSON.parse(localStorage.getItem("user")) || null);
+const token = ref(localStorage.getItem("token") || null);
 
 export function useAuth() {
-  const router = useRouter();
-  const user = ref(JSON.parse(localStorage.getItem("user_session")) || null);
-
-  const isAuthenticated = computed(() => !!user.value);
-
-  const login = (userData) => {
+  const login = (userData, authToken) => {
     user.value = userData;
-    localStorage.setItem("user_session", JSON.stringify(userData));
+    token.value = authToken;
+
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", authToken);
+  };
+
+  const register = (userData) => {
+    // demo register save
+    localStorage.setItem("registeredUser", JSON.stringify(userData));
   };
 
   const logout = () => {
     user.value = null;
-    localStorage.removeItem("user_session");
-    router.push("/auth/login");
+    token.value = null;
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
-  const getUserRole = () => user.value?.role || "guest";
+  const isLoggedIn = () => {
+    return !!token.value;
+  };
+
+  const getUser = () => {
+    return user.value;
+  };
+
+  const getUserRole = () => {
+    return user.value?.role || null;
+  };
+
+  const getToken = () => {
+    return token.value;
+  };
 
   return {
-    user,
-    isAuthenticated,
     login,
+    register,
     logout,
+    isLoggedIn,
+    getUser,
     getUserRole,
+    getToken,
   };
 }

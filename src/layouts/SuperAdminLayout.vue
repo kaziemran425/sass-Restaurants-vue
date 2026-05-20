@@ -1,6 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-
     <!-- HEADER -->
     <q-header elevated class="bg-purple text-white">
       <q-toolbar>
@@ -10,14 +9,13 @@
 
         <q-space />
 
-        <q-btn flat icon="logout" label="Logout" @click="logout" />
+        <q-btn flat icon="logout" label="Logout" @click="handleLogout" />
       </q-toolbar>
     </q-header>
 
     <!-- DRAWER -->
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-
         <q-item-label header>Super Admin Menu</q-item-label>
 
         <q-item clickable v-ripple to="/superadmin/dashboard">
@@ -40,7 +38,6 @@
           </q-item-section>
           <q-item-section>Subscription Plans</q-item-section>
         </q-item>
-
       </q-list>
     </q-drawer>
 
@@ -48,25 +45,26 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuth } from "src/composables/useAuth";
 
 const router = useRouter();
+const { logout } = useAuth();
+
 const leftDrawerOpen = ref(true);
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
 
-const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
-  router.push("/auth/login");
+// ✅ fixed logout
+const handleLogout = () => {
+  logout();
+  router.replace("/auth/login");
 };
 </script>
